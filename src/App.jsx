@@ -2,7 +2,7 @@ import React from 'react'
 
 function App() {
   return (
-    <div>welcom to shoping cart</div>
+    <div className='text-3xl font-bold'>welcom to shoping cart</div>
   )
 }
 
