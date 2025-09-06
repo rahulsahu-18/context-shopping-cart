@@ -18,49 +18,41 @@ const ProductProvider = ({ children }) => {
         setWholeProduct(data.products)
     }
 
-    const viewDetails = async (id) => {
-        if(typeof id === 'string')
-            navigate('/id')
-        else if(id > 100)
-             navigate('/id');
-            
-        navigate(`/product/${id}`);
-        setLoading(true);
-        const response = await fetch(`https://dummyjson.com/products/${id}`);
-        const data = await response.json();
-        console.log(data);
-        setCustomProduct(data);
-        setLoading(false);
-    }
     const addToCart = (product) => {
-        navigate('/cart')
-        const { id, price, thumbnail, title, description } = product;
-        const cartObj = {
-            id,
-            price,
-            thumbnail,
-            title,
-            description,
-            quantity: 1,
-        }
-        const index = cartData.findIndex((obj) => obj.id == product.id)
-        if (index === -1) {
-            setCartData([...cartData, cartObj]);
-            setTotal((prev)=>prev + cartObj.price)
+        const copyCartData = [...cartData];
+        const findProductIndex = copyCartData.findIndex((item) => item.id === product.id);
+
+        if (findProductIndex === -1) {
+            copyCartData.push({ ...product, quantity: 1, totalPrice: product.price });
         } else {
-            const updatedCart = [...cartData];
-            updatedCart[index] = { ...updatedCart[index], quantity: updatedCart[index].quantity + 1 };
-            setCartData(updatedCart);
-            setTotal((prev)=>prev + cartObj.price)
+            copyCartData[findProductIndex] = {...copyCartData[findProductIndex], quantity: copyCartData[findProductIndex].quantity + 1, totalPrice: (copyCartData[findProductIndex].quantity+1) * copyCartData[findProductIndex].price}
         }
+        setCartData(copyCartData);
+        localStorage.setItem("cartData",JSON.stringify(copyCartData));
+        navigate('/cart',{replace:true});
 
     }
+    
+    const removeFromCart = (product,totallyDelete) => {
+        const copyCart = [...cartData];
+        const findIndex = copyCart.findIndex((item)=>item.id === product.id);
+
+        if(totallyDelete)
+        copyCart.splice(findIndex,1);
+       else
+        copyCart[findIndex] = {...copyCart[findIndex],quantity:copyCart[findIndex].quantity - 1,totalPrice:(copyCart[findIndex].quantity - 1)*(copyCart[findIndex].price) }
+       localStorage.setItem("cartData",JSON.stringify(copyCart));
+       setCartData(copyCart)
+    }
+
     useEffect(() => {
         fetchProduct();
+      const cartItem =  localStorage.getItem("cartData");
+      setCartData(cartItem ? JSON.parse(cartItem):[]);
     }, [])
 
     return (
-        <productContext.Provider value={{ total, setTotal, setCartData, addToCart, cartData, wholeProduct, loading, viewDetails, customProduct }}>
+        <productContext.Provider value={{ setLoading, total, setCustomProduct, setTotal, setCartData, addToCart, cartData, wholeProduct, loading, customProduct,removeFromCart }}>
             {children}
         </productContext.Provider>
     )
