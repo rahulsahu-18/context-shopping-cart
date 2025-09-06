@@ -17,7 +17,6 @@ This project demonstrates state management using React Context API and localStor
 
 ```bash
 git clone https://github.com/rahulsahu-18/context-shopping-cart.git
-cd shoping-cart
 npm install
 npm start
 
